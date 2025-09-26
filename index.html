@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Assyrian Ordering Game</title>
+<style>
+  body { font-family: Arial, sans-serif; padding: 2rem; background: #f9f9f9; }
+  #assyrian { font-size: 2rem; margin-bottom: 1rem; }
+  input[type=text] { width: 100%; padding: 0.5rem; font-size: 1.2rem; }
+  button { margin-top: 1rem; padding: 0.5rem 1rem; font-size: 1.2rem; }
+  #feedback { margin-top: 1rem; font-weight: bold; }
+</style>
+</head>
+<body>
+
+<h1>Assyrian Ordering Game</h1>
+
+<div id="assyrian">Loading...</div>
+
+<label for="answer">Type the English translation:</label>
+<input type="text" id="answer" autocomplete="off" />
+<button id="submitBtn">Submit</button>
+
+<div id="feedback"></div>
+
+<script>
+const PHRASES = {
+  "i order (masc.)":"ܛܵܠܒܹܢ","i will order (masc.)":"ܛܵܠܒܹܢ ܒܸܕ",
+  "i order (fem.)":"ܛܵܠܒܵܢ","i will order (fem.)":"ܛܵܠܒܵܢ ܒܸܕ",
+  "you order (masc.)":"ܛܵܠܒܹܬ","you will order (masc.)":"ܛܵܠܒܹܬ ܒܸܕ",
+  "you order (fem.)":"ܛܵܠܒܵܬܝ","you will order (fem.)":"ܛܵܠܒܵܬܝ ܒܸܕ",
+  "he orders":"ܛܵܠܹܒ","he will order":"ܛܵܠܹܒ ܒܸܕ",
+  "she orders":"ܛܵܠܒܵܐ","she will order":"ܛܵܠܒܵܐ ܒܸܕ",
+  "we order":"ܛܵܠܒܲܚ","we will order":"ܛܵܠܒܲܚ ܒܸܕ",
+  "they order":"ܛܵܠܒܝܼ","they will order":"ܛܵܠܒܝܼ ܒܸܕ",
+  "y’all order":"ܛܵܠܒܝܼܬܘܿܢ","y’all will order":"ܛܵܠܒܝܼܬܘܿܢ ܒܸܕ"
+};
+
+const FOODS_EN = ["potatoes","rice","beans","stew","kabobs","chicken","steak","lamb","fish","fries","water","fizzy drinks","yogurt drink","lemonade","orange juice","dolma","red rice","okra stew","yogurt","assyrian egg rolls","tea","coffee","hummus","baba ganosh","salad","pickles","meatballs"];
+
+const FOODS_SY = ["ܟܸܪܬܘܿܦܹ̈ܐ","ܪܸܙܵܐ","ܚܲܒ̣ܨܹ̈ܐ","ܫܘܼܪܒ̣ܵܐ","ܟܵܒܵܒܹ̈ܐ","ܟܬܵܝܬܵܐ","ܒܸܣܪܵܐ","ܥܸܪܒܵܐ","ܢܘܼܢܵܐ","ܟܸܪܬܘܿܦܹ̈ܐ ܩܸܠܝܹ̈ܐ","ܡܝܼܵܐ","ܫܬܵܝܬܵܐ ܒܲܩܒܸܩܵܢܵܐ","ܕܲܘܹ̈ܐ","ܡܝܼܵܐ ܕܠܝܼܡܘܿܢܹ̈ܐ","ܡܝܼܵܐ ܕܦܘܼܪ̈ܬܩܵܠܹܐ","ܕܘܿܠܡܵܐ","ܪܸܙܵܐ ܣܡܘܿܩܵܐ","ܒܲܡܝܹ̈ܐ","ܡܲܣܬܵܐ","ܒܘܼܪܲܟ","ܟ̰ܵܐܝ","ܩܲܗܘܵܐ","ܚܲܪ̈ܛܡܵܢܹܐ ܓܪ̈ܝܼܣܹܐ","ܒܵܕܸܡܓ̰ܵܢܹ̈ܐ ܓܪ̈ܝܼܣܹܐ","ܣܲܠܵܛܵܐ","ܛܘܼܪ̈ܫܝܹܐ","ܟܸܦܬܹ̈ܐ"];
+
+let currentEnglishPhrase = "";
+let currentEnglishFood = "";
+let currentAssyrianSentence = "";
+
+function normalize(str) {
+  return str.toLowerCase().replace(/[^a-z0-9]/g, "");
+}
+
+function newRound() {
+  // Pick random phrase key and English key
+  const phraseKeys = Object.keys(PHRASES);
+  const phraseIndex = Math.floor(Math.random() * phraseKeys.length);
+  const foodIndex = Math.floor(Math.random() * FOODS_EN.length);
+
+  // English phrase (like "i order (masc.)")
+  const phraseEnglish = phraseKeys[phraseIndex];
+  // Assyrian phrase
+  const phraseAssyrian = PHRASES[phraseEnglish];
+
+  // Food English and Assyrian
+  const foodEnglish = FOODS_EN[foodIndex];
+  const foodAssyrian = FOODS_SY[foodIndex];
+
+  currentEnglishPhrase = phraseEnglish.replace(/\(.*?\)/g, "").trim(); // Remove gender notes
+  currentEnglishFood = foodEnglish;
+  currentAssyrianSentence = phraseAssyrian + " " + foodAssyrian;
+
+  // Show Assyrian sentence
+  document.getElementById("assyrian").textContent = currentAssyrianSentence;
+
+  // Clear input and feedback
+  document.getElementById("answer").value = "";
+  document.getElementById("feedback").textContent = "";
+}
+
+document.getElementById("submitBtn").addEventListener("click", () => {
+  const userInput = normalize(document.getElementById("answer").value);
+  const correctAnswer = normalize(currentEnglishPhrase + currentEnglishFood);
+
+  if (userInput === correctAnswer) {
+    document.getElementById("feedback").textContent = "Correct! 🎉";
+    setTimeout(newRound, 1500);
+  } else {
+    document.getElementById("feedback").textContent = "Try again!";
+  }
+});
+
+document.getElementById("answer").addEventListener("keypress", e => {
+  if (e.key === "Enter") {
+    document.getElementById("submitBtn").click();
+  }
+});
+
+newRound();
+</script>
+
+</body>
+</html>
