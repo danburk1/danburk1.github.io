@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Assyrian Sentence Typing Game</title>
+<title>Assyrian Ordering Game</title>
 <style>
   @font-face {
     font-family: 'Estre';
@@ -11,7 +11,7 @@
     font-weight: normal;
     font-style: normal;
   }
-
+  
   body, html {
     height: 100%;
     margin: 0;
@@ -21,6 +21,7 @@
     flex-direction: column;
   }
 
+  /* Red banner */
   header {
     background-color: #cc2222;
     color: white;
@@ -31,6 +32,7 @@
     user-select: none;
   }
 
+  /* Progress container */
   #progress-container {
     background: #ddd;
     height: 20px;
@@ -38,7 +40,7 @@
     max-width: 500px;
     border-radius: 10px;
     overflow: hidden;
-    margin: 0.5rem auto 0 auto;
+    margin: 0.5rem auto;
     position: relative;
   }
 
@@ -53,7 +55,6 @@
     text-align: center;
     margin-top: 0.25rem;
     font-weight: 600;
-    user-select: none;
   }
 
   main {
@@ -71,7 +72,7 @@
 
   #assyrian {
     font-family: 'Estre', serif;
-    font-size: 3.8rem;
+    font-size: 3.8rem; /* bigger for better readability */
     margin-bottom: 1.5rem;
     user-select: none;
   }
@@ -104,13 +105,8 @@
     transition: background-color 0.3s ease;
   }
 
-  button:hover:not(:disabled) {
+  button:hover {
     background-color: #aa1a1a;
-  }
-
-  button:disabled {
-    background-color: #ee9999;
-    cursor: not-allowed;
   }
 
   #feedback {
@@ -124,164 +120,129 @@
 </head>
 <body>
 
-<header>Assyrian Sentence Typing Game</header>
+<header>Assyrian Ordering Game</header>
+
 <div id="progress-container">
   <div id="progress-bar"></div>
 </div>
-<div id="progress-text">0 / 0</div>
+<div id="progress-text">0 / 10</div>
 
 <main>
-  <div id="assyrian" aria-live="polite"></div>
+  <div id="assyrian">Loading...</div>
+
   <label for="answer">Type the English translation:</label>
   <input type="text" id="answer" autocomplete="off" />
   <button id="submitBtn">Submit</button>
-  <div id="feedback" aria-live="assertive"></div>
+
+  <div id="feedback"></div>
 </main>
 
 <script>
 const PHRASES = {
-  "I order (masc.)":"ܛܵܠܒܹܢ","I will order (masc.)":"ܛܵܠܒܹܢ ܒܸܕ","I order (fem.)":"ܛܵܠܒܵܢ","I will order (fem.)":"ܛܵܠܒܵܢ ܒܸܕ",
-  "you order (masc.)":"ܛܵܠܒܹܬ","you will order (masc.)":"ܛܵܠܒܹܬ ܒܸܕ","you order (fem.)":"ܛܵܠܒܵܬܝ","you will order (fem.)":"ܛܵܠܒܵܬܝ ܒܸܕ",
-  "he orders":"ܛܵܠܹܒ","he will order":"ܛܵܠܹܒ ܒܸܕ","she orders":"ܛܵܠܒܵܐ","she will order":"ܛܵܠܒܵܐ ܒܸܕ",
-  "we order":"ܛܵܠܒܲܚ","we will order":"ܛܵܠܒܲܚ ܒܸܕ","they order":"ܛܵܠܒܝܼ","they will order":"ܛܵܠܒܝܼ ܒܸܕ",
-  "y’all order":"ܛܵܠܒܝܼܬܘܿܢ","y’all will order":"ܛܵܠܒܝܼܬܘܿܢ ܒܸܕ",
+  "i order (masc.)":"ܛܵܠܒܹܢ","i will order (masc.)":"ܛܵܠܒܹܢ ܒܸܕ",
+  "i order (fem.)":"ܛܵܠܒܵܢ","i will order (fem.)":"ܛܵܠܒܵܢ ܒܸܕ",
+  "you order (masc.)":"ܛܵܠܒܹܬ","you will order (masc.)":"ܛܵܠܒܹܬ ܒܸܕ",
+  "you order (fem.)":"ܛܵܠܒܵܬܝ","you will order (fem.)":"ܛܵܠܒܵܬܝ ܒܸܕ",
+  "he orders":"ܛܵܠܹܒ","he will order":"ܛܵܠܹܒ ܒܸܕ",
+  "she orders":"ܛܵܠܒܵܐ","she will order":"ܛܵܠܒܵܐ ܒܸܕ",
+  "we order":"ܛܵܠܒܲܚ","we will order":"ܛܵܠܒܲܚ ܒܸܕ",
+  "they order":"ܛܵܠܒܝܼ","they will order":"ܛܵܠܒܝܼ ܒܸܕ",
+  "y’all order":"ܛܵܠܒܝܼܬܘܿܢ","y’all will order":"ܛܵܠܒܝܼܬܘܿܢ ܒܸܕ"
 };
-const PRONOUNS = { 
-  i_masc:"ܐܵܢܵܐ", 
-  i_fem:"ܐܵܢܵܐ", 
-  you_masc:"ܐܲܢ݇ܬ", 
-  you_fem:"ܐܲܢ݇ܬܝ", 
-  he:"ܗ̇ܘ", 
-  she:"ܗ̇ܝ", 
-  we:"ܐܲܚܢܲܢ", 
-  yall:"ܐܲܚܬܘܿܢ", 
-  they:"ܐܵܢܝܼ" 
+
+const PRONOUNS = {
+  "i order (masc.)": "ܐܵܢܵܐ",
+  "i will order (masc.)": "ܐܵܢܵܐ",
+  "i order (fem.)": "ܐܵܢܵܐ",
+  "i will order (fem.)": "ܐܵܢܵܐ",
+  "you order (masc.)": "ܐܲܢ݇ܬ",
+  "you will order (masc.)": "ܐܲܢ݇ܬ",
+  "you order (fem.)": "ܐܲܢ݇ܬܝ",
+  "you will order (fem.)": "ܐܲܢ݇ܬܝ",
+  "he orders": "ܗ̇ܘ",
+  "he will order": "ܗ̇ܘ",
+  "she orders": "ܗ̇ܝ",
+  "she will order": "ܗ̇ܝ",
+  "we order": "ܐܲܚܢܲܢ",
+  "we will order": "ܐܲܚܢܲܢ",
+  "they order": "ܐܵܢܝܼ",
+  "they will order": "ܐܵܢܝܼ",
+  "y’all order": "ܐܲܚܬܘܿܢ",
+  "y’all will order": "ܐܲܚܬܘܿܢ"
 };
-const FOODS_EN = ["potatoes","rice","beans","stew","kabobs","chicken","steak","lamb","fish","fries","water","fizzy drinks","yogurt drink","lemonade","orange juice","dolma","red rice","okra stew","yogurt","Assyrian egg rolls","tea","coffee","hummus","baba ganosh","salad","pickles","meatballs"];
+
+const FOODS_EN = ["potatoes","rice","beans","stew","kabobs","chicken","steak","lamb","fish","fries","water","fizzy drinks","yogurt drink","lemonade","orange juice","dolma","red rice","okra stew","yogurt","assyrian egg rolls","tea","coffee","hummus","baba ganosh","salad","pickles","meatballs"];
 const FOODS_SY = ["ܟܸܪܬܘܿܦܹ̈ܐ","ܪܸܙܵܐ","ܚܲܒ̣ܨܹ̈ܐ","ܫܘܼܪܒ̣ܵܐ","ܟܵܒܵܒܹ̈ܐ","ܟܬܵܝܬܵܐ","ܒܸܣܪܵܐ","ܥܸܪܒܵܐ","ܢܘܼܢܵܐ","ܟܸܪܬܘܿܦܹ̈ܐ ܩܸܠܝܹ̈ܐ","ܡܝܼܵܐ","ܫܬܵܝܬܵܐ ܒܲܩܒܸܩܵܢܵܐ","ܕܲܘܹ̈ܐ","ܡܝܼܵܐ ܕܠܝܼܡܘܿܢܹ̈ܐ","ܡܝܼܵܐ ܕܦܘܼܪ̈ܬܩܵܠܹܐ","ܕܘܿܠܡܵܐ","ܪܸܙܵܐ ܣܡܘܿܩܵܐ","ܒܲܡܝܹ̈ܐ","ܡܲܣܬܵܐ","ܒܘܼܪܲܟ","ܟ̰ܵܐܝ","ܩܲܗܘܵܐ","ܚܲܪ̈ܛܡܵܢܹܐ ܓܪ̈ܝܼܣܹܐ","ܒܵܕܸܡܓ̰ܵܢܹ̈ܐ ܓܪ̈ܝܼܣܹܐ","ܣܲܠܵܛܵܐ","ܛܘܼܪ̈ܫܝܹܐ","ܟܸܦܬܹ̈ܐ"];
 
-const PHRASE_KEYS = Object.keys(PHRASES);
-const PRONOUN_KEYS = Object.keys(PRONOUNS);
+const TOTAL_QUESTIONS = 10;
 
-let currentIndex = 0;
 let currentEnglishPhrase = "";
 let currentEnglishFood = "";
-let currentAssyrianPhrase = "";
-let currentAssyrianPronoun = "";
-let currentAssyrianFood = "";
-let incorrectTries = 0;
+let currentAssyrianSentence = "";
+let currentKey = "";
 
-const assyrianEl = document.getElementById("assyrian");
-const answerInput = document.getElementById("answer");
-const feedbackEl = document.getElementById("feedback");
-const progressBar = document.getElementById("progress-bar");
-const progressText = document.getElementById("progress-text");
+let questionCount = 0;
 
 function normalize(str) {
-  return str.toLowerCase().replace(/[^\w]/g, "");
-}
-
-function pickRandom(arr) {
-  return arr[Math.floor(Math.random() * arr.length)];
-}
-
-// We pick a phrase, a pronoun that matches the phrase, and a food item.
-// Phrase keys like "I order (masc.)" correspond to pronouns keys like "i_masc".
-// So we map phrase to pronoun key with some simple logic.
-
-function getPronounKeyFromPhraseKey(phraseKey) {
-  // Simple mapping logic based on phrase key text
-  phraseKey = phraseKey.toLowerCase();
-
-  if (phraseKey.startsWith("i order") || phraseKey.startsWith("i will order")) {
-    return phraseKey.includes("(masc.)") ? "i_masc" : "i_fem";
-  }
-  if (phraseKey.startsWith("you order") || phraseKey.startsWith("you will order")) {
-    return phraseKey.includes("(masc.)") ? "you_masc" : "you_fem";
-  }
-  if (phraseKey.startsWith("he ")) return "he";
-  if (phraseKey.startsWith("she ")) return "she";
-  if (phraseKey.startsWith("we ")) return "we";
-  if (phraseKey.startsWith("y’all ")) return "yall";
-  if (phraseKey.startsWith("they ")) return "they";
-
-  // fallback
-  return "i_masc";
+  return str.toLowerCase().replace(/[^a-z0-9]/g, "");
 }
 
 function newRound() {
-  incorrectTries = 0;
-  answerInput.disabled = false;
-  document.getElementById("submitBtn").disabled = false;
-  feedbackEl.textContent = "";
-  answerInput.value = "";
-  answerInput.focus();
+  if (questionCount >= TOTAL_QUESTIONS) {
+    // Game over
+    document.getElementById("assyrian").textContent = "🎉 Game Over! Thanks for playing.";
+    document.getElementById("answer").disabled = true;
+    document.getElementById("submitBtn").disabled = true;
+    document.getElementById("feedback").textContent = "";
+    return;
+  }
 
-  // Pick phrase, food, pronoun
-  currentEnglishPhrase = pickRandom(PHRASE_KEYS);
-  currentEnglishFood = pickRandom(FOODS_EN);
+  // Pick random phrase key and food index
+  const phraseKeys = Object.keys(PHRASES);
+  const phraseIndex = Math.floor(Math.random() * phraseKeys.length);
+  const foodIndex = Math.floor(Math.random() * FOODS_EN.length);
 
-  const pronounKey = getPronounKeyFromPhraseKey(currentEnglishPhrase);
-  currentAssyrianPronoun = PRONOUNS[pronounKey];
-  currentAssyrianPhrase = PHRASES[currentEnglishPhrase];
-  currentAssyrianFood = FOODS_SY[FOODS_EN.indexOf(currentEnglishFood)];
+  currentKey = phraseKeys[phraseIndex];
+  const phraseAssyrian = PHRASES[currentKey];
+  const pronounAssyrian = PRONOUNS[currentKey] || "";
 
-  // Combine Assyrian: pronoun + phrase + food
-  // Separate by space for clarity in Assyrian text
-  assyrianEl.textContent = `${currentAssyrianPronoun} ${currentAssyrianPhrase} ${currentAssyrianFood}`;
+  currentEnglishPhrase = currentKey.replace(/\(.*?\)/g, "").trim(); // Remove gender notes
+  currentEnglishFood = FOODS_EN[foodIndex];
+  const foodAssyrian = FOODS_SY[foodIndex];
 
-  updateProgress();
-}
+  // Build Assyrian sentence: pronoun + phrase + food
+  currentAssyrianSentence = pronounAssyrian + " " + phraseAssyrian + " " + foodAssyrian;
 
-function updateProgress() {
-  const total = PHRASE_KEYS.length;
-  const current = currentIndex + 1;
-  const percent = (current / total) * 100;
-  progressBar.style.width = `${percent}%`;
-  progressText.textContent = `${current} / ${total}`;
+  document.getElementById("assyrian").textContent = currentAssyrianSentence;
+
+  document.getElementById("answer").value = "";
+  document.getElementById("feedback").textContent = "";
+
+  // Update progress bar and text
+  questionCount++;
+  const percent = (questionCount / TOTAL_QUESTIONS) * 100;
+  document.getElementById("progress-bar").style.width = percent + "%";
+  document.getElementById("progress-text").textContent = `${questionCount} / ${TOTAL_QUESTIONS}`;
 }
 
 document.getElementById("submitBtn").addEventListener("click", () => {
-  const userInput = normalize(answerInput.value);
-  const correctAnswer = normalize(currentEnglishPhrase + " " + currentEnglishFood);
+  const userInput = normalize(document.getElementById("answer").value);
+  const correctAnswer = normalize(currentEnglishPhrase + currentEnglishFood);
 
   if (userInput === correctAnswer) {
-    feedbackEl.textContent = "Correct! 🎉";
-    currentIndex++;
-    if (currentIndex >= PHRASE_KEYS.length) {
-      feedbackEl.textContent = "🎉🎉 You've completed all phrases! Refresh to play again.";
-      answerInput.disabled = true;
-      document.getElementById("submitBtn").disabled = true;
-      progressBar.style.width = "100%";
-      progressText.textContent = `${PHRASE_KEYS.length} / ${PHRASE_KEYS.length}`;
-      return;
-    }
-    incorrectTries = 0;
+    document.getElementById("feedback").textContent = "Correct! 🎉";
     setTimeout(newRound, 1200);
   } else {
-    incorrectTries++;
-    if (incorrectTries >= 3) {
-      feedbackEl.textContent = `Incorrect 3 times. The correct answer is: "${currentEnglishPhrase} ${currentEnglishFood}"`;
-      answerInput.disabled = true;
-      document.getElementById("submitBtn").disabled = true;
-      setTimeout(() => {
-        currentIndex++;
-        if (currentIndex >= PHRASE_KEYS.length) {
-          feedbackEl.textContent = "🎉🎉 You've completed all phrases! Refresh to play again.";
-          return;
-        }
-        answerInput.disabled = false;
-        document.getElementById("submitBtn").disabled = false;
-        incorrectTries = 0;
-        newRound();
-      }, 3500);
-    } else {
-      feedbackEl.textContent = `Try again! (${incorrectTries} / 3)`;
-    }
+    document.getElementById("feedback").textContent = "Try again!";
   }
 });
 
-// Start the game
+document.getElementById("answer").addEventListener("keypress", e => {
+  if (e.key === "Enter") {
+    document.getElementById("submitBtn").click();
+  }
+});
+
 newRound();
 </script>
 
