@@ -5,24 +5,137 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Assyrian Ordering Game</title>
 <style>
-  body { font-family: Arial, sans-serif; padding: 2rem; background: #f9f9f9; }
-  #assyrian { font-size: 2rem; margin-bottom: 1rem; }
-  input[type=text] { width: 100%; padding: 0.5rem; font-size: 1.2rem; }
-  button { margin-top: 1rem; padding: 0.5rem 1rem; font-size: 1.2rem; }
-  #feedback { margin-top: 1rem; font-weight: bold; }
+  @font-face {
+    font-family: 'Estre';
+    src: url('estre.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+  }
+  
+  body, html {
+    height: 100%;
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f9f9f9;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Red banner */
+  header {
+    background-color: #cc2222;
+    color: white;
+    padding: 1rem 0;
+    text-align: center;
+    font-size: 1.8rem;
+    font-weight: bold;
+    user-select: none;
+  }
+
+  /* Progress container */
+  #progress-container {
+    background: #ddd;
+    height: 20px;
+    width: 100%;
+    max-width: 500px;
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 0.5rem auto;
+    position: relative;
+  }
+
+  #progress-bar {
+    background-color: #cc2222;
+    height: 100%;
+    width: 0%;
+    transition: width 0.4s ease;
+  }
+
+  #progress-text {
+    text-align: center;
+    margin-top: 0.25rem;
+    font-weight: 600;
+  }
+
+  main {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+    max-width: 600px;
+    margin: auto;
+    width: 90%;
+    text-align: center;
+  }
+
+  #assyrian {
+    font-family: 'Estre', serif;
+    font-size: 3.8rem; /* bigger for better readability */
+    margin-bottom: 1.5rem;
+    user-select: none;
+  }
+
+  label {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    display: block;
+  }
+
+  input[type=text] {
+    width: 100%;
+    padding: 0.7rem;
+    font-size: 1.3rem;
+    border: 2px solid #cc2222;
+    border-radius: 8px;
+    box-sizing: border-box;
+  }
+
+  button {
+    margin-top: 1rem;
+    padding: 0.7rem 1.5rem;
+    font-size: 1.3rem;
+    background-color: #cc2222;
+    border: none;
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+
+  button:hover {
+    background-color: #aa1a1a;
+  }
+
+  #feedback {
+    margin-top: 1.2rem;
+    font-weight: bold;
+    font-size: 1.3rem;
+    min-height: 1.5em;
+    user-select: none;
+  }
 </style>
 </head>
 <body>
 
-<h1>Assyrian Ordering Game</h1>
+<header>Assyrian Ordering Game</header>
 
-<div id="assyrian">Loading...</div>
+<div id="progress-container">
+  <div id="progress-bar"></div>
+</div>
+<div id="progress-text">0 / 10</div>
 
-<label for="answer">Type the English translation:</label>
-<input type="text" id="answer" autocomplete="off" />
-<button id="submitBtn">Submit</button>
+<main>
+  <div id="assyrian">Loading...</div>
 
-<div id="feedback"></div>
+  <label for="answer">Type the English translation:</label>
+  <input type="text" id="answer" autocomplete="off" />
+  <button id="submitBtn">Submit</button>
+
+  <div id="feedback"></div>
+</main>
 
 <script>
 const PHRASES = {
@@ -37,43 +150,79 @@ const PHRASES = {
   "y’all order":"ܛܵܠܒܝܼܬܘܿܢ","y’all will order":"ܛܵܠܒܝܼܬܘܿܢ ܒܸܕ"
 };
 
-const FOODS_EN = ["potatoes","rice","beans","stew","kabobs","chicken","steak","lamb","fish","fries","water","fizzy drinks","yogurt drink","lemonade","orange juice","dolma","red rice","okra stew","yogurt","assyrian egg rolls","tea","coffee","hummus","baba ganosh","salad","pickles","meatballs"];
+const PRONOUNS = {
+  "i order (masc.)": "ܐܵܢܵܐ",
+  "i will order (masc.)": "ܐܵܢܵܐ",
+  "i order (fem.)": "ܐܵܢܵܐ",
+  "i will order (fem.)": "ܐܵܢܵܐ",
+  "you order (masc.)": "ܐܲܢ݇ܬ",
+  "you will order (masc.)": "ܐܲܢ݇ܬ",
+  "you order (fem.)": "ܐܲܢ݇ܬܝ",
+  "you will order (fem.)": "ܐܲܢ݇ܬܝ",
+  "he orders": "ܗ̇ܘ",
+  "he will order": "ܗ̇ܘ",
+  "she orders": "ܗ̇ܝ",
+  "she will order": "ܗ̇ܝ",
+  "we order": "ܐܲܚܢܲܢ",
+  "we will order": "ܐܲܚܢܲܢ",
+  "they order": "ܐܵܢܝܼ",
+  "they will order": "ܐܵܢܝܼ",
+  "y’all order": "ܐܲܚܬܘܿܢ",
+  "y’all will order": "ܐܲܚܬܘܿܢ"
+};
 
+const FOODS_EN = ["potatoes","rice","beans","stew","kabobs","chicken","steak","lamb","fish","fries","water","fizzy drinks","yogurt drink","lemonade","orange juice","dolma","red rice","okra stew","yogurt","assyrian egg rolls","tea","coffee","hummus","baba ganosh","salad","pickles","meatballs"];
 const FOODS_SY = ["ܟܸܪܬܘܿܦܹ̈ܐ","ܪܸܙܵܐ","ܚܲܒ̣ܨܹ̈ܐ","ܫܘܼܪܒ̣ܵܐ","ܟܵܒܵܒܹ̈ܐ","ܟܬܵܝܬܵܐ","ܒܸܣܪܵܐ","ܥܸܪܒܵܐ","ܢܘܼܢܵܐ","ܟܸܪܬܘܿܦܹ̈ܐ ܩܸܠܝܹ̈ܐ","ܡܝܼܵܐ","ܫܬܵܝܬܵܐ ܒܲܩܒܸܩܵܢܵܐ","ܕܲܘܹ̈ܐ","ܡܝܼܵܐ ܕܠܝܼܡܘܿܢܹ̈ܐ","ܡܝܼܵܐ ܕܦܘܼܪ̈ܬܩܵܠܹܐ","ܕܘܿܠܡܵܐ","ܪܸܙܵܐ ܣܡܘܿܩܵܐ","ܒܲܡܝܹ̈ܐ","ܡܲܣܬܵܐ","ܒܘܼܪܲܟ","ܟ̰ܵܐܝ","ܩܲܗܘܵܐ","ܚܲܪ̈ܛܡܵܢܹܐ ܓܪ̈ܝܼܣܹܐ","ܒܵܕܸܡܓ̰ܵܢܹ̈ܐ ܓܪ̈ܝܼܣܹܐ","ܣܲܠܵܛܵܐ","ܛܘܼܪ̈ܫܝܹܐ","ܟܸܦܬܹ̈ܐ"];
+
+const TOTAL_QUESTIONS = 10;
 
 let currentEnglishPhrase = "";
 let currentEnglishFood = "";
 let currentAssyrianSentence = "";
+let currentKey = "";
+
+let questionCount = 0;
 
 function normalize(str) {
   return str.toLowerCase().replace(/[^a-z0-9]/g, "");
 }
 
 function newRound() {
-  // Pick random phrase key and English key
+  if (questionCount >= TOTAL_QUESTIONS) {
+    // Game over
+    document.getElementById("assyrian").textContent = "🎉 Game Over! Thanks for playing.";
+    document.getElementById("answer").disabled = true;
+    document.getElementById("submitBtn").disabled = true;
+    document.getElementById("feedback").textContent = "";
+    return;
+  }
+
+  // Pick random phrase key and food index
   const phraseKeys = Object.keys(PHRASES);
   const phraseIndex = Math.floor(Math.random() * phraseKeys.length);
   const foodIndex = Math.floor(Math.random() * FOODS_EN.length);
 
-  // English phrase (like "i order (masc.)")
-  const phraseEnglish = phraseKeys[phraseIndex];
-  // Assyrian phrase
-  const phraseAssyrian = PHRASES[phraseEnglish];
+  currentKey = phraseKeys[phraseIndex];
+  const phraseAssyrian = PHRASES[currentKey];
+  const pronounAssyrian = PRONOUNS[currentKey] || "";
 
-  // Food English and Assyrian
-  const foodEnglish = FOODS_EN[foodIndex];
+  currentEnglishPhrase = currentKey.replace(/\(.*?\)/g, "").trim(); // Remove gender notes
+  currentEnglishFood = FOODS_EN[foodIndex];
   const foodAssyrian = FOODS_SY[foodIndex];
 
-  currentEnglishPhrase = phraseEnglish.replace(/\(.*?\)/g, "").trim(); // Remove gender notes
-  currentEnglishFood = foodEnglish;
-  currentAssyrianSentence = phraseAssyrian + " " + foodAssyrian;
+  // Build Assyrian sentence: pronoun + phrase + food
+  currentAssyrianSentence = pronounAssyrian + " " + phraseAssyrian + " " + foodAssyrian;
 
-  // Show Assyrian sentence
   document.getElementById("assyrian").textContent = currentAssyrianSentence;
 
-  // Clear input and feedback
   document.getElementById("answer").value = "";
   document.getElementById("feedback").textContent = "";
+
+  // Update progress bar and text
+  questionCount++;
+  const percent = (questionCount / TOTAL_QUESTIONS) * 100;
+  document.getElementById("progress-bar").style.width = percent + "%";
+  document.getElementById("progress-text").textContent = `${questionCount} / ${TOTAL_QUESTIONS}`;
 }
 
 document.getElementById("submitBtn").addEventListener("click", () => {
@@ -82,7 +231,7 @@ document.getElementById("submitBtn").addEventListener("click", () => {
 
   if (userInput === correctAnswer) {
     document.getElementById("feedback").textContent = "Correct! 🎉";
-    setTimeout(newRound, 1500);
+    setTimeout(newRound, 1200);
   } else {
     document.getElementById("feedback").textContent = "Try again!";
   }
