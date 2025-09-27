@@ -61,6 +61,7 @@ function newRound() {
   }
 
   guesses = 3;
+  document.getElementById("submitBtn").disabled = false;
 
   // Pick random phrase key and food index
   const phraseKeys = Object.keys(PHRASES);
@@ -97,10 +98,12 @@ document.getElementById("submitBtn").addEventListener("click", () => {
   if (userInput === correctAnswer) {
     questionsCorrect++;
     document.getElementById("feedback").textContent = "Correct! 🎉";
+    document.getElementById("submitBtn").disabled = true;
     setTimeout(newRound, 1200);
   } else {
     guesses--;
     document.getElementById("feedback").textContent = "Try again! (" + guesses + " chances left)";
+    document.getElementById("submitBtn").disabled = true;
     if (guesses < 0){
         document.getElementById("feedback").textContent = "Correct answer was: " + (currentEnglishPhrase + currentEnglishFood);
         setTimeout(newRound,1500);        
