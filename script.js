@@ -42,6 +42,7 @@ let currentAssyrianSentence = "";
 let currentKey = "";
 
 let questionCount = 0;
+let questionsCorrect = 0;
 let guesses = 3;
 
 function normalize(str) {
@@ -51,12 +52,15 @@ function normalize(str) {
 function newRound() {
   if (questionCount >= TOTAL_QUESTIONS) {
     // Game over
-    document.getElementById("assyrian").textContent = "🎉 Game Over! Thanks for playing.";
+    document.getElementsById("assyrian").id = "winscreen";
+    document.getElementById("assyrian").textContent = "🎉 Game Over! Thanks for playing. " + ((questionsCorrect / TOTAL_QUESTIONS) * 100.0).toFixed(2);
     document.getElementById("answer").disabled = true;
     document.getElementById("submitBtn").disabled = true;
     document.getElementById("feedback").textContent = "";
     return;
   }
+
+  guesses = 3;
 
   // Pick random phrase key and food index
   const phraseKeys = Object.keys(PHRASES);
@@ -91,13 +95,14 @@ document.getElementById("submitBtn").addEventListener("click", () => {
   const correctAnswer = normalize(currentEnglishPhrase + currentEnglishFood);
 
   if (userInput === correctAnswer) {
+    questionsCorrect++;
     document.getElementById("feedback").textContent = "Correct! 🎉";
     setTimeout(newRound, 1200);
   } else {
     guesses--;
     document.getElementById("feedback").textContent = "Try again! (" + guesses + " chances left)";
     if (guesses < 0){
-        document.getElementById("feedback").textContent = "Correct answer was: " + correctAnswer;
+        document.getElementById("feedback").textContent = "Correct answer was: " + (currentEnglishPhrase + currentEnglishFood);
         setTimeout(newRound,1500);        
     }
   }

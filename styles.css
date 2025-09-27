@@ -70,6 +70,11 @@
     user-select: none;
   }
 
+ #winscreen {
+    margin-bottom: 1.5rem;
+    user-select: none;
+  }
+
   label {
     font-size: 1.2rem;
     font-weight: 600;
