@@ -103,10 +103,10 @@ document.getElementById("submitBtn").addEventListener("click", () => {
   } else {
     guesses--;
     document.getElementById("feedback").textContent = "Try again! (" + guesses + " chances left)";
-    document.getElementById("submitBtn").disabled = true;
     if (guesses < 0){
         document.getElementById("feedback").textContent = "Correct answer was: " + (currentEnglishPhrase + currentEnglishFood);
-        setTimeout(newRound,1500);        
+        document.getElementById("submitBtn").disabled = true;
+       setTimeout(newRound,1500);        
     }
   }
 });
