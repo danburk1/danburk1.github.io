@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Ruffle Fullscreen SWF Player</title>
+  <script src="ruffle.js"></script>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+      background: #000;
+    }
+
+    #container {
+      width: 100vw;
+      height: 100vh;
+    }
+
+    ruffle-player {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    #fullscreen-button {
+      position: absolute;
+      z-index: 10;
+      top: 10px;
+      left: 10px;
+      padding: 10px 20px;
+      background: rgba(255,255,255,0.8);
+      border: none;
+      font-size: 16px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="container">
+    <button id="fullscreen-button">Go Fullscreen</button>
+    <ruffle-player id="player" autoplay="true"></ruffle-player>
+  </div>
+
+  <script>
+    window.RufflePlayer = window.RufflePlayer || {};
+    window.addEventListener("DOMContentLoaded", () => {
+      const ruffle = window.RufflePlayer.newest();
+      const player = ruffle.createPlayer();
+      player.style.width = "100%";
+      player.style.height = "100%";
+      document.getElementById("player").replaceWith(player);
+      player.load("bloons-tower-defense-5.swf");
+
+      // Fullscreen button
+      document.getElementById("fullscreen-button").addEventListener("click", () => {
+        player.enterFullscreen();
+      });
+    });
+  </script>
+
+</body>
+</html>
