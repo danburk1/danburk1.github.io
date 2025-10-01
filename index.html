@@ -3,27 +3,92 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Assyrian Ordering Quiz</title>
-  <link rel="stylesheet" type="text/css" href="styles.css">
+  <title>Assyrian Language Assessment</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-<header>Assyrian Ordering Game</header>
-
-<div id="progress-container">
-  <div id="progress-bar"></div>
+<!-- Start Screen -->
+<div id="start-screen">
+  <h1>Assyrian Language Assessment</h1>
+  <p>This assessment will test your ability to translate Assyrian phrases into English. You will have 10 questions to complete.</p>
+  
+  <div class="info-box">
+    <h3>Assessment Rules</h3>
+    <ul>
+      <li>You have 3 attempts per question</li>
+      <li>The assessment will enter fullscreen mode</li>
+      <li>Tab changes will be logged</li>
+      <li>Complete all 10 questions to see your results</li>
+    </ul>
+  </div>
+  
+  <button class="start-btn" id="start-btn">Begin Assessment</button>
 </div>
-<div id="progress-text">0 / 10</div>
 
-<main>
-  <div id="assyrian">Loading...</div>
+<!-- Assessment Screen -->
+<div id="assessment-screen">
+  <div class="assessment-header">
+    <h2>Assyrian Language Assessment</h2>
+    <div class="header-right">
+      <div class="timer" id="timer">00:00</div>
+      <div class="warning-indicator" id="warning-indicator">⚠️ Tab Change Detected</div>
+    </div>
+  </div>
+  
+  <div class="progress-container">
+    <div class="progress-bar" id="progress-bar"></div>
+  </div>
+  
+  <div class="assessment-content">
+    <div class="question-container">
+      <div class="question-number" id="question-number">Question 1 of 10</div>
+      <div class="assyrian-text" id="assyrian-text">Loading...</div>
+      <div class="question-label">English Translation:</div>
+      <input type="text" class="answer-input" id="answer-input" autocomplete="off" placeholder="Type your answer here..." />
+      <div class="button-group">
+        <button class="submit-btn" id="submit-btn">Submit Answer</button>
+        <button class="next-btn" id="next-btn">Next Question</button>
+      </div>
+      <div class="feedback" id="feedback"></div>
+    </div>
+  </div>
+</div>
 
-  <label for="answer">Type the English translation:</label>
-  <input type="text" id="answer" autocomplete="off" />
-  <button id="submitBtn">Submit</button>
+<!-- Results Screen -->
+<div id="results-screen">
+  <div class="results-box">
+    <h2>Assessment Complete</h2>
+    <div class="score-display" id="score-display">0%</div>
+    <div class="score-label">Final Score</div>
+    
+    <div class="stats-grid">
+      <div class="stat-item">
+        <div class="stat-label">Correct Answers</div>
+        <div class="stat-value" id="correct-count">0</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">Total Questions</div>
+        <div class="stat-value">10</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">Time Elapsed</div>
+        <div class="stat-value" id="time-elapsed">00:00</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">Tab Changes</div>
+        <div class="stat-value" id="tab-changes">0</div>
+      </div>
+    </div>
+    
+    <div class="warning-log" id="warning-log" style="display: none;">
+      <h4>⚠️ Academic Integrity Notice</h4>
+      <p>Tab changes were detected during this assessment. Your instructor has been notified.</p>
+    </div>
 
-  <div id="feedback"></div>
-</main>
+    <div class="answer-review" id="answer-review"></div>
+  </div>
+</div>
 
 <script src="script.js"></script>
 
